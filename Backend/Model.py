@@ -55,7 +55,7 @@ def FirstLayerDMM(prompt: str = "test"):
     messages.append({"role": "user", "content": f"{prompt}"})
 
     stream = co.chat(
-        model='command-r-plus',
+        model='command-xlarge-nightly', 
         message=prompt,
         temperature=0.7,
         chat_history=ChatHistory,

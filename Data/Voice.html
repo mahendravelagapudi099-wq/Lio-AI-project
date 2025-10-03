@@ -12,7 +12,7 @@
         let recognition;
 
         function startRecognition() {
-            recognition = new webkitSpeechRecognition() || new SpeechRecognition();
+            recognition = new (webkitSpeechRecognition || SpeechRecognition)();
             recognition.lang = 'en';
             recognition.continuous = true;
 
@@ -24,6 +24,7 @@
             recognition.onend = function() {
                 recognition.start();
             };
+
             recognition.start();
         }
 
