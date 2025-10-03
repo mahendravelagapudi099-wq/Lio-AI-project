@@ -16,6 +16,7 @@ from Backend.SpeechToText import SpeechRecognition
 from Backend.Chatbot import ChatBot
 from Backend.TextToSpeech import TextToSpeech
 from Backend.Hotword import StartHotwordThread
+from Backend.ContentModule import Content  # ✅ ADDED
 from dotenv import dotenv_values
 from asyncio import run
 from time import sleep
@@ -141,6 +142,11 @@ def MainExecution(query=None):
                     Decision = [f"google search {Query_lower.replace('search', '').strip()}"]
                 print(f"[Fix] Detected search command: {Decision}")
             
+            # Check for content/notepad commands
+            elif any(keyword in Query_lower for keyword in ["write", "create", "type"]) and "notepad" in Query_lower:
+                Decision = [f"content {Query}"]
+                print(f"[Fix] Detected content command: {Decision}")
+            
             # Check for exit commands
             elif any(keyword in Query_lower for keyword in ["exit", "quit", "bye", "goodbye", "stop"]):
                 Decision = ["exit"]
@@ -153,28 +159,64 @@ def MainExecution(query=None):
 
         print(f"\nFinal Decision: {Decision}\n")
 
-        valid_functions = ["open", "close", "play", "system", "content", "google search", "youtube search"]
-        automation_commands = [cmd for cmd in Decision if any(cmd.startswith(func) for func in valid_functions)]
-        general_queries = [cmd.replace("general", "").strip() for cmd in Decision if cmd.startswith("general")]
-        realtime_queries = [cmd.replace("realtime", "").strip() for cmd in Decision if cmd.startswith("realtime")]
-        image_queries = [cmd for cmd in Decision if "generate" in cmd]
+        # Define valid functions for automation
+        valid_functions = [
+            "open", "close", "play", "system", "content", 
+            "google search", "youtube search",
+            "open file", "edit file", "read file", "create file",
+            "delete file", "copy file", "move file", "rename file",
+            "list files", "file info"
+        ]
+        
+        # Categorize commands
+        automation_commands = []
+        general_queries = []
+        realtime_queries = []
+        image_queries = []
+        
+        for cmd in Decision:
+            cmd_lower = cmd.lower()
+            
+            # Check if it's an automation command
+            if any(cmd_lower.startswith(func) for func in valid_functions):
+                automation_commands.append(cmd)
+            # Check for general queries
+            elif cmd_lower.startswith("general"):
+                general_queries.append(cmd.replace("general", "").strip())
+            # Check for realtime queries
+            elif cmd_lower.startswith("realtime"):
+                realtime_queries.append(cmd.replace("realtime", "").strip())
+            # Check for image generation
+            elif "generate" in cmd_lower or "image" in cmd_lower:
+                image_queries.append(cmd)
+            # Default to general query if no match
+            else:
+                general_queries.append(cmd)
 
         print(f"Automation commands: {automation_commands}")
         print(f"General queries: {general_queries}")
         print(f"Realtime queries: {realtime_queries}")
         print(f"Image queries: {image_queries}\n")
 
+        # Execute automation commands
         if automation_commands:
             print(f"[MainExecution] Running automation with: {automation_commands}")
-            run(Automation(automation_commands))
-            TaskExecution = True
+            try:
+                run(Automation(automation_commands))
+                TaskExecution = True
+            except Exception as e:
+                print(f"[MainExecution] Automation error: {e}")
+                import traceback
+                traceback.print_exc()
 
+        # Handle image generation
         if image_queries:
             ImageGenerationQuery = image_queries[0]
             ImageExecution = True
-            with open(r'Frontend\Files\ImageGeneration.data', "w") as file:
-                file.write(f"{ImageGenerationQuery},True")
             try:
+                with open(r'Frontend\Files\ImageGeneration.data', "w") as file:
+                    file.write(f"{ImageGenerationQuery},True")
+                
                 p1 = subprocess.Popen(
                     ['python', r"Backend\ImageGeneration.py"],
                     stdout=subprocess.PIPE,
@@ -183,36 +225,57 @@ def MainExecution(query=None):
                     shell=False,
                 )
                 subprocess_list.append(p1)
+                print(f"[MainExecution] Image generation started")
             except Exception as e:
-                print(f"Error starting ImageGeneration.py: {e}")
+                print(f"[MainExecution] Error starting ImageGeneration.py: {e}")
 
+        # Handle general queries
         for query in general_queries:
-            SetAsssistantStatus("Thinking...")
-            Answer = ChatBot(QueryModifier(query))
-            ShowTextToScreen(f"{Assistantname}: {Answer}")
-            SetAsssistantStatus("Answering...")
-            TextToSpeech(Answer)
+            try:
+                SetAsssistantStatus("Thinking...")
+                Answer = ChatBot(QueryModifier(query))
+                ShowTextToScreen(f"{Assistantname}: {Answer}")
+                SetAsssistantStatus("Answering...")
+                TextToSpeech(Answer)
+            except Exception as e:
+                print(f"[MainExecution] ChatBot error: {e}")
 
+        # Handle realtime queries
         for query in realtime_queries:
-            SetAsssistantStatus("Searching...")
-            Answer = RealtimeSearchEngine(QueryModifier(query))
-            ShowTextToScreen(f"{Assistantname}: {Answer}")
-            SetAsssistantStatus("Answering...")
-            TextToSpeech(Answer)
+            try:
+                SetAsssistantStatus("Searching...")
+                Answer = RealtimeSearchEngine(QueryModifier(query))
+                ShowTextToScreen(f"{Assistantname}: {Answer}")
+                SetAsssistantStatus("Answering...")
+                TextToSpeech(Answer)
+            except Exception as e:
+                print(f"[MainExecution] RealtimeSearch error: {e}")
 
+        # Handle exit command
         if "exit" in [cmd.lower() for cmd in Decision]:
-            Answer = ChatBot(QueryModifier("Okay, Bye!"))
-            ShowTextToScreen(f"{Assistantname}: {Answer}")
-            SetAsssistantStatus("Answering...")
-            TextToSpeech(Answer)
-            os._exit(1)
+            try:
+                Answer = ChatBot(QueryModifier("Okay, Bye!"))
+                ShowTextToScreen(f"{Assistantname}: {Answer}")
+                SetAsssistantStatus("Answering...")
+                TextToSpeech(Answer)
+                sleep(2)
+                os._exit(1)
+            except Exception as e:
+                print(f"[MainExecution] Exit error: {e}")
+                os._exit(1)
+
+        # Set back to available if no speaking required
+        if not general_queries and not realtime_queries:
+            SetAsssistantStatus("Available...")
 
     except Exception as e:
-        print(f"Error in MainExecution: {e}")
+        print(f"[MainExecution] Critical error: {e}")
         import traceback
         traceback.print_exc()
+        SetAsssistantStatus("Available...")
 
 def FirstThread():
+    """Monitor microphone status and trigger MainExecution"""
     last_microphone_status = ""
     last_assistant_status = ""
 
@@ -221,6 +284,7 @@ def FirstThread():
             CurrentStatus = GetMicrophoneStatus()
             AIStatus = GetAssistantStatus()
 
+            # Log status changes
             if CurrentStatus != last_microphone_status:
                 print(f"Current Microphone Status: {CurrentStatus}")
                 last_microphone_status = CurrentStatus
@@ -229,6 +293,7 @@ def FirstThread():
                 print(f"Current Assistant Status: {AIStatus}")
                 last_assistant_status = AIStatus
 
+            # Execute if microphone is active
             if CurrentStatus.lower() == "true":
                 print("Executing MainExecution")
                 MainExecution()
@@ -239,18 +304,47 @@ def FirstThread():
             sleep(1)
 
         except Exception as e:
-            print(f"Error in FirstThread: {e}")
+            print(f"[FirstThread] Error: {e}")
+            import traceback
+            traceback.print_exc()
             sleep(1)
 
 def SecondThread():
+    """Start the graphical user interface"""
     try:
         GraphicalUserInterface()
     except Exception as e:
-        print(f"Error in SecondThread: {e}")
+        print(f"[SecondThread] Error: {e}")
+        import traceback
+        traceback.print_exc()
 
 if __name__ == "__main__":
-    InitialExecution()
-    StartHotwordThread(MainExecution)   # ✅ Pass callback here
-    thread1 = threading.Thread(target=FirstThread, daemon=True)
-    thread1.start()
-    SecondThread()
+    print("\n" + "="*70)
+    print("STARTING LIO AI ASSISTANT")
+    print("="*70 + "\n")
+    
+    try:
+        # Initialize the application
+        InitialExecution()
+        
+        # Start hotword detection thread
+        print("[Main] Starting hotword detection...")
+        StartHotwordThread(MainExecution)
+        
+        # Start monitoring thread
+        print("[Main] Starting monitoring thread...")
+        thread1 = threading.Thread(target=FirstThread, daemon=True)
+        thread1.start()
+        
+        # Start GUI (blocking)
+        print("[Main] Starting GUI...")
+        SecondThread()
+        
+    except KeyboardInterrupt:
+        print("\n[Main] Shutting down gracefully...")
+        os._exit(0)
+    except Exception as e:
+        print(f"[Main] Critical startup error: {e}")
+        import traceback
+        traceback.print_exc()
+        os._exit(1)
