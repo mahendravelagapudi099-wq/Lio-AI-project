@@ -61,6 +61,8 @@ Current Context:
 - Always consider real-time information provided
 - Prioritize recent and authoritative sources
 - Distinguish between facts and opinions
+
+IMPORTANT: If the user specifies a length constraint like "in two lines", "briefly", "in one sentence", "in three words", etc., you MUST strictly follow that constraint and keep your response within the specified length.
 """
 
 SystemChatBot = [

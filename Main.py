@@ -17,6 +17,7 @@ from Backend.Chatbot import ChatBot
 from Backend.TextToSpeech import TextToSpeech
 from Backend.Hotword import StartHotwordThread
 from Backend.ContentModule import Content  # ✅ ADDED
+from Backend.app.weather import GetWeather, GetForecast # ✅ ADDED
 from dotenv import dotenv_values
 from asyncio import run
 from time import sleep
@@ -35,6 +36,7 @@ DefaultMessage = f""" {Username}: Hello {Assistantname}, How are you?
 
 functions = ["open", "close", "play", "system", "content", "google search", "youtube search"]
 subprocess_list = []
+execution_lock = threading.Lock()
 
 # Ensure a default chat log exists if no chats are logged
 def ShowDefaultChatIfNoChats():
@@ -104,6 +106,10 @@ def MainExecution(query=None):
     Execute the recognized command(s).
     If `query` is None, use SpeechRecognition to get the query.
     """
+    if not execution_lock.acquire(blocking=False):
+        print("[MainExecution] Blocked: Another execution is already in progress.")
+        return
+
     try:
         TaskExecution = False
         ImageExecution = False
@@ -173,6 +179,8 @@ def MainExecution(query=None):
         general_queries = []
         realtime_queries = []
         image_queries = []
+        weather_queries = []
+        forecast_queries = []
         
         for cmd in Decision:
             cmd_lower = cmd.lower()
@@ -189,6 +197,12 @@ def MainExecution(query=None):
             # Check for image generation
             elif "generate" in cmd_lower or "image" in cmd_lower:
                 image_queries.append(cmd)
+            # Check for weather
+            elif cmd_lower.startswith("weather"):
+                weather_queries.append(cmd.replace("weather", "").strip())
+            # Check for forecast
+            elif cmd_lower.startswith("forecast"):
+                forecast_queries.append(cmd.replace("forecast", "").strip())
             # Default to general query if no match
             else:
                 general_queries.append(cmd)
@@ -196,7 +210,9 @@ def MainExecution(query=None):
         print(f"Automation commands: {automation_commands}")
         print(f"General queries: {general_queries}")
         print(f"Realtime queries: {realtime_queries}")
-        print(f"Image queries: {image_queries}\n")
+        print(f"Image queries: {image_queries}")
+        print(f"Weather queries: {weather_queries}")
+        print(f"Forecast queries: {forecast_queries}\n")
 
         # Execute automation commands
         if automation_commands:
@@ -251,6 +267,28 @@ def MainExecution(query=None):
             except Exception as e:
                 print(f"[MainExecution] RealtimeSearch error: {e}")
 
+        # Handle weather queries
+        for loc in weather_queries:
+            try:
+                SetAsssistantStatus("Checking Weather...")
+                Answer = GetWeather(loc if loc else "auto")
+                ShowTextToScreen(f"{Assistantname}: {Answer}")
+                SetAsssistantStatus("Answering...")
+                TextToSpeech(Answer)
+            except Exception as e:
+                print(f"[MainExecution] Weather error: {e}")
+
+        # Handle forecast queries
+        for loc in forecast_queries:
+            try:
+                SetAsssistantStatus("Checking Forecast...")
+                Answer = GetForecast(loc if loc else "auto")
+                ShowTextToScreen(f"{Assistantname}: {Answer}")
+                SetAsssistantStatus("Answering...")
+                TextToSpeech(Answer)
+            except Exception as e:
+                print(f"[MainExecution] Forecast error: {e}")
+
         # Handle exit command
         if "exit" in [cmd.lower() for cmd in Decision]:
             try:
@@ -273,6 +311,8 @@ def MainExecution(query=None):
         import traceback
         traceback.print_exc()
         SetAsssistantStatus("Available...")
+    finally:
+        execution_lock.release()
 
 def FirstThread():
     """Monitor microphone status and trigger MainExecution"""
@@ -332,9 +372,9 @@ if __name__ == "__main__":
         StartHotwordThread(MainExecution)
         
         # Start monitoring thread
-        print("[Main] Starting monitoring thread...")
-        thread1 = threading.Thread(target=FirstThread, daemon=True)
-        thread1.start()
+        # print("[Main] Starting monitoring thread...")
+        # thread1 = threading.Thread(target=FirstThread, daemon=True)
+        # thread1.start()
         
         # Start GUI (blocking)
         print("[Main] Starting GUI...")

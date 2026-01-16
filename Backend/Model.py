@@ -10,7 +10,7 @@ co = cohere.Client(api_key=CohereAPIKey)
 funcs = [
     "exit", "general", "realtime", "open", "close", "play",
     "generate image", "system", "content", "google search",
-    "youtube search", "reminder"
+    "youtube search", "reminder", "weather", "forecast"
 ]
 
 messages = []
@@ -20,7 +20,9 @@ You are a very accurate Decision-Making Model, which decides what kind of a quer
 You will decide whether a query is a 'general' query, a 'realtime' query, or is asking to perform any task or automation like 'open facebook, instagram', 'can you write a application and open it in notepad'
 *** Do not answer any query, just decide what kind of query is given to you. ***
 -> Respond with 'general ( query )' if a query can be answered by a llm model (conversational ai chatbot) and doesn't require any up to date information like if the query is 'who was akbar?' respond with 'general who was akbar?', if the query is 'how can i study more effectively?' respond with 'general how can i study more effectively?', if the query is 'can you help me with this math problem?' respond with 'general can you help me with this math problem?', if the query is 'Thanks, i really liked it.' respond with 'general thanks, i really liked it.' , if the query is 'what is python programming language?' respond with 'general what is python programming language?', etc. Respond with 'general (query)' if a query doesn't have a proper noun or is incomplete like if the query is 'who is he?' respond with 'general who is he?', if the query is 'what's his networth?' respond with 'general what's his networth?', if the query is 'tell me more about him.' respond with 'general tell me more about him.', and so on even if it require up-to-date information to answer. Respond with 'general (query)' if the query is asking about time, day, date, month, year, etc like if the query is 'what's the time?' respond with 'general what's the time?'.
--> Respond with 'realtime ( query )' if a query can not be answered by a llm model (because they don't have realtime data) and requires up to date information like if the query is 'who is indian prime minister' respond with 'realtime who is indian prime minister', if the query is 'tell me about facebook's recent update.' respond with 'realtime tell me about facebook's recent update.', if the query is 'tell me news about coronavirus.' respond with 'realtime tell me news about coronavirus.', etc and if the query is asking about any individual or thing like if the query is 'who is akshay kumar' respond with 'realtime who is akshay kumar', if the query is 'what is today's news?' respond with 'realtime what is today's news?', if the query is 'what is today's headline?' respond with 'realtime what is today's headline?', etc.
+-> Respond with 'weather (location)' if a query is asking about current weather, temperature, or climate conditions like if the query is 'what is the weather in alwal' respond with 'weather alwal', if the query is 'tell me the weather' respond with 'weather auto', if the query is 'how is the temperature today' respond with 'weather auto', if the query is 'is it sunny in delhi' respond with 'weather delhi', etc.
+-> Respond with 'forecast (location)' if a query is asking about weather forecast or future weather predictions like if the query is 'weather forecast for tomorrow' respond with 'forecast auto', if the query is 'will it rain this week in mumbai' respond with 'forecast mumbai', etc.
+-> Respond with 'realtime ( query )' if a query can not be answered by a llm model (because they don't have realtime data) and requires up to date information like if the query is 'who is indian prime minister' respond with 'realtime who is indian prime minister', if the query is 'tell me about facebook's recent update.' respond with 'realtime tell me about facebook's recent update.', if the query is 'tell me news about coronavirus.' respond with 'realtime tell me news about coronavirus.', etc and if the query is asking about any individual or thing like if the query is 'who is akshay kumar' respond with 'realtime who is akshay kumar', if the query is 'what is today's news?' respond with 'realtime what is today's news?', if the query is 'what is today's headline?' respond with 'realtime what is today's headline?', etc. DO NOT use 'realtime' for weather queries, always use 'weather' or 'forecast' instead.
 -> Respond with 'open (application name or website name)' if a query is asking to open any application like 'open facebook', 'open telegram', etc. but if the query is asking to open multiple applications, respond with 'open 1st application name, open 2nd application name' and so on.
 -> Respond with 'close (application name)' if a query is asking to close any application like 'close notepad', 'close facebook', etc. but if the query is asking to close multiple applications or websites, respond with 'close 1st application name, close 2nd application name' and so on.
 -> Respond with 'play (song name)' if a query is asking to play any song like 'play afsanay by ys', 'play let her go', etc. but if the query is asking to play multiple songs, respond with 'play 1st song name, play 2nd song name' and so on.
@@ -206,8 +208,15 @@ def FallbackDMM(prompt: str):
     if any(word in prompt_lower for word in ["volume", "mute", "unmute", "brightness"]):
         return [f"system {prompt}"]
     
-    # Realtime queries (news, weather, current events)
-    if any(word in prompt_lower for word in ["news", "weather", "temperature", "current", "latest", "today's"]):
+    # Weather/Forecast queries
+    if any(word in prompt_lower for word in ["weather", "temperature", "forecast", "climate"]):
+        if "forecast" in prompt_lower:
+            return [f"forecast {prompt_lower.replace('forecast', '').strip()}"]
+        else:
+            return [f"weather {prompt_lower.replace('weather', '').strip()}"]
+
+    # Realtime queries (news, current events)
+    if any(word in prompt_lower for word in ["news", "current", "latest", "today's", "headline"]):
         return [f"realtime {prompt}"]
     
     # Exit commands
