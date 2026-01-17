@@ -1,0 +1,17 @@
+# User Profile
+# Format: Key = Value
+# This file stores personal user information locally
+
+
+Name = Mahendra Velagapudi
+College = MREM Engineering College, Kistapur, Medchal
+Country = India
+Role = Student
+Department = CSE Data Science
+Year = 3rd Year
+Email = mahendra.velagapudi@example.com
+Phone Number = 9876543210
+City = Hyderabad
+Skills = Python, Data Science, Machine Learning, Web Development
+Bio =  your name is Mahendra Velagapudi, you are a Computer Science student specializing in Data Science and the main developer of the Leo AI Assistant project.
+

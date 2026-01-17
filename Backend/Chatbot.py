@@ -4,6 +4,7 @@ from dotenv import dotenv_values
 import requests
 import datetime
 from groq import Groq
+from Backend.PrivateMemory import PrivateMemory
 
 # Load environment variables
 env_vars = dotenv_values(".env")
@@ -68,6 +69,23 @@ def AnswerModifier(Answer):
 def ChatBot(Query):
     """Send the user's query to the chatbot and return the AI's response"""
     try:
+        # Local Identity Check
+        local_response = PrivateMemory.check_query(Query)
+            
+        if local_response:
+            try:
+                with open(r"Data\ChatLog.json", "r") as f:
+                    messages = load(f)
+            except:
+                messages = []
+                
+            messages.append({"role": "user", "content": f"{Query}"})
+            messages.append({"role": "assistant", "content": local_response})
+            
+            with open(r"Data\ChatLog.json", "w") as f:
+                dump(messages, f, indent=4)
+            return local_response
+
         with open(r"Data\ChatLog.json", "r") as f:
             messages = load(f)
 
