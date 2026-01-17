@@ -133,8 +133,13 @@ def MainExecution(query=None):
             print("[Fix] FirstLayerDMM returned empty. Parsing query directly...")
             Query_lower = Query.lower().strip()
             
+            # Check for YouTube control commands
+            if any(keyword in Query_lower for keyword in ["pause", "resume", "next", "skip", "volume up", "volume down"]):
+                Decision = [Query_lower]
+                print(f"[Fix] Detected YouTube control: {Decision}")
+            
             # Check for automation commands
-            if any(keyword in Query_lower for keyword in ["open", "close", "play", "start", "launch"]):
+            elif any(keyword in Query_lower for keyword in ["open", "close", "play", "start", "launch"]):
                 Decision = [Query_lower]
                 print(f"[Fix] Detected automation command: {Decision}")
             
@@ -163,6 +168,7 @@ def MainExecution(query=None):
                 Decision = [f"general {Query}"]
                 print(f"[Fix] Treating as general query")
 
+
         print(f"\nFinal Decision: {Decision}\n")
 
         # Define valid functions for automation
@@ -171,7 +177,9 @@ def MainExecution(query=None):
             "google search", "youtube search",
             "open file", "edit file", "read file", "create file",
             "delete file", "copy file", "move file", "rename file",
-            "list files", "file info"
+            "list files", "file info",
+            # YouTube controls
+            "pause", "resume", "next", "skip", "volume"
         ]
         
         # Categorize commands
@@ -185,8 +193,12 @@ def MainExecution(query=None):
         for cmd in Decision:
             cmd_lower = cmd.lower()
             
-            # Check if it's an automation command
-            if any(cmd_lower.startswith(func) for func in valid_functions):
+            # Check for YouTube control commands (using 'in' for better matching)
+            youtube_controls = ["pause", "resume", "next", "skip", "volume up", "volume down"]
+            if any(control in cmd_lower for control in youtube_controls):
+                automation_commands.append(cmd)
+            # Check if it's an automation command (starts with valid function)
+            elif any(cmd_lower.startswith(func) for func in valid_functions):
                 automation_commands.append(cmd)
             # Check for general queries
             elif cmd_lower.startswith("general"):

@@ -272,12 +272,11 @@ def HotwordListener(main_execution_callback):
                         current_time = f"The current time is {get_current_time()}."
                         date_info = f"Today is {get_current_date()}."
 
-                        ShowTextToScreen(f"{AssistantName}: {greeting}\n{date_info}\n{current_time}")
+                        # Combine all messages into one TTS call for better reliability
+                        combined_message = f"{greeting} {date_info} {current_time} How can I help you today?"
                         
-                        TextToSpeech(greeting)
-                        TextToSpeech(date_info)
-                        TextToSpeech(current_time)
-                        TextToSpeech("How can I help you today?")
+                        ShowTextToScreen(f"{AssistantName}: {greeting}\n{date_info}\n{current_time}")
+                        TextToSpeech(combined_message)
 
                         hotword_triggered = True
                         SetMicrophoneStatus("True")

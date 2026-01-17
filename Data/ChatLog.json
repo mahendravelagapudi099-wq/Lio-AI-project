@@ -106,5 +106,117 @@
     {
         "role": "assistant",
         "content": "No weather information available for \"auto\" as it's not a valid location."
+    },
+    {
+        "role": "user",
+        "content": "Exit."
+    },
+    {
+        "role": "assistant",
+        "content": "Goodbye."
+    },
+    {
+        "role": "user",
+        "content": "Okay, bye."
+    },
+    {
+        "role": "assistant",
+        "content": "Bye."
+    },
+    {
+        "role": "user",
+        "content": "Plane contestant."
+    },
+    {
+        "role": "assistant",
+        "content": "The contestant on a plane is likely a passenger."
+    },
+    {
+        "role": "user",
+        "content": "Dekhne wali file."
+    },
+    {
+        "role": "assistant",
+        "content": "Viewable file or document."
+    },
+    {
+        "role": "user",
+        "content": "Make full."
+    },
+    {
+        "role": "assistant",
+        "content": "Completed or made whole."
+    },
+    {
+        "role": "user",
+        "content": "Volume of."
+    },
+    {
+        "role": "assistant",
+        "content": "Volume of a substance or object, typically measured in units like liters or cubic meters."
+    },
+    {
+        "role": "user",
+        "content": "Play."
+    },
+    {
+        "role": "assistant",
+        "content": "Start or begin an activity."
+    },
+    {
+        "role": "user",
+        "content": "Play the video."
+    },
+    {
+        "role": "assistant",
+        "content": "The video is playing."
+    },
+    {
+        "role": "user",
+        "content": "Resume."
+    },
+    {
+        "role": "assistant",
+        "content": "Playback has resumed."
+    },
+    {
+        "role": "user",
+        "content": "Resume."
+    },
+    {
+        "role": "assistant",
+        "content": "The video is playing again."
+    },
+    {
+        "role": "user",
+        "content": "Play next video."
+    },
+    {
+        "role": "assistant",
+        "content": "Next video is playing."
+    },
+    {
+        "role": "user",
+        "content": "Resume."
+    },
+    {
+        "role": "assistant",
+        "content": "Video playback has resumed."
+    },
+    {
+        "role": "user",
+        "content": "Exit."
+    },
+    {
+        "role": "assistant",
+        "content": "Video playback has stopped."
+    },
+    {
+        "role": "user",
+        "content": "Okay, bye."
+    },
+    {
+        "role": "assistant",
+        "content": "Bye."
     }
 ]
