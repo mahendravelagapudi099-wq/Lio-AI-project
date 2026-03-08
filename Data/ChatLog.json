@@ -1,222 +1,554 @@
 [
     {
+        "role": "system",
+        "content": "[2026-01-27 22:24:57] ERROR: Tier 2: Network Connectivity - ChatBot (Groq)"
+    },
+    {
         "role": "user",
-        "content": "Come to."
+        "content": "What is the time?"
     },
     {
         "role": "assistant",
-        "content": "I'm here."
+        "content": "22 hours, 30 minutes, 25 seconds."
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-27 22:31:02] ERROR: Tier 2: Network Connectivity - Usage Simulator"
     },
     {
         "role": "user",
-        "content": "Save the file."
+        "content": "who are you"
     },
     {
         "role": "assistant",
-        "content": "File saved."
+        "content": "My name is Leo."
     },
     {
         "role": "user",
-        "content": "Are used in notepad."
+        "content": "<MagicMock name='mock.QueryModifier()' id='2012438258192'>"
     },
     {
         "role": "assistant",
-        "content": "Shortcuts like Ctrl+S are used in Notepad."
+        "content": "I'm Friday, an AI chatbot."
     },
     {
         "role": "user",
-        "content": "Exit."
+        "content": "<MagicMock name='mock.QueryModifier()' id='1593431281920'>"
     },
     {
         "role": "assistant",
-        "content": "Notepad closed."
+        "content": "I'm Friday, an AI chatbot."
     },
     {
         "role": "user",
-        "content": "Okay, bye."
-    },
-    {
-        "role": "user",
-        "content": "Weather hyderabad."
+        "content": "<MagicMock name='mock.QueryModifier()' id='2143184062944'>"
     },
     {
         "role": "assistant",
-        "content": "Hyderabad's current weather is not available, please check online for updates."
+        "content": "I'm Friday."
     },
     {
         "role": "user",
-        "content": "And the isro difference between."
+        "content": "<MagicMock name='mock.QueryModifier()' id='2412534461792'>"
     },
     {
         "role": "assistant",
-        "content": "ISRO is India's space agency, and the difference between ISRO and other space agencies is their unique missions and achievements."
+        "content": "I'm Friday."
     },
     {
         "role": "user",
-        "content": "Can you explain me?"
+        "content": "Who are you?"
     },
     {
         "role": "assistant",
-        "content": "ISRO focuses on indigenous development, cost-effective missions, and collaborative projects."
+        "content": "My name is Leo."
     },
     {
         "role": "user",
-        "content": "Explain me more about space."
+        "content": "<MagicMock name='mock.QueryModifier()' id='2412534461792'>"
     },
     {
         "role": "assistant",
-        "content": "Space is the vast, almost infinite, three-dimensional expanse that comprises the universe, including planets, stars, galaxies, and other celestial objects."
+        "content": "I'm Friday, an AI chatbot."
     },
     {
         "role": "user",
-        "content": "Weather hyderabad."
+        "content": "<MagicMock name='mock.QueryModifier()' id='1593431281920'>"
     },
     {
         "role": "assistant",
-        "content": "Hyderabad's current weather is partly cloudy with a temperature range of 15-25 degrees Celsius."
+        "content": "I'm Friday."
     },
     {
         "role": "user",
-        "content": "Weather medchal."
+        "content": "<MagicMock name='mock.QueryModifier()' id='2012438258192'>"
     },
     {
         "role": "assistant",
-        "content": "Medchal's current weather is mostly sunny with a temperature range of 18-28 degrees Celsius."
+        "content": "I'm Friday, an AI chatbot."
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-27 22:47:30] ERROR: Tier 5: Logical Core - Scenario 3"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-27 22:49:52] ERROR: Tier 5: Logical Core - FirstLayerDMM (Cohere)"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 0"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 1"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 2"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 3"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 4"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 5"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 6"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 7"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 8"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 9"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 10"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 11"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 12"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 13"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 14"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 15"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 16"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 17"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 18"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 19"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 20"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 21"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 22"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 23"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 24"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 25"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 26"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 27"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 28"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 29"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 30"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 31"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 32"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 33"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 34"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 35"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 36"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 37"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 38"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 39"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 40"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 41"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 42"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 43"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 44"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 45"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 46"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 47"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 48"
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-28 04:26:14] Stress Test Entry 49"
     },
     {
         "role": "user",
-        "content": "Weather auto."
+        "content": "What is the capital of France?"
     },
     {
         "role": "assistant",
-        "content": "I'm not aware of a location called \"auto\", could you please provide more context or clarify the location."
+        "content": "Paris is the capital."
     },
     {
         "role": "user",
-        "content": "Forecast auto."
+        "content": "What is the capital of France?"
     },
     {
         "role": "assistant",
-        "content": "I'm not aware of a location called \"auto\", please provide a valid location to get the forecast."
+        "content": "Paris is the capital."
     },
     {
         "role": "user",
-        "content": "Weather auto."
+        "content": "Who are you?"
     },
     {
         "role": "assistant",
-        "content": "No weather information available for \"auto\" as it's not a valid location."
+        "content": "My name is Leo."
     },
     {
         "role": "user",
-        "content": "Exit."
+        "content": "What is the color of the sky?"
     },
     {
         "role": "assistant",
-        "content": "Goodbye."
+        "content": "I am a test bot."
     },
     {
         "role": "user",
-        "content": "Okay, bye."
+        "content": "What is the color of the sky now?"
     },
     {
         "role": "assistant",
-        "content": "Bye."
+        "content": "According to search results, the sky is blue."
     },
     {
         "role": "user",
-        "content": "Plane contestant."
+        "content": "What is the capital of France?"
     },
     {
         "role": "assistant",
-        "content": "The contestant on a plane is likely a passenger."
+        "content": "The capital of France is Paris."
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-31 22:03:31] ERROR: Tier 5: Logical Core - FirstLayerDMM (Cohere)"
     },
     {
         "role": "user",
-        "content": "Dekhne wali file."
+        "content": "Who are you?"
     },
     {
         "role": "assistant",
-        "content": "Viewable file or document."
+        "content": "My name is Leo."
+    },
+    {
+        "role": "system",
+        "content": "[2026-01-31 22:05:12] ERROR: Tier 5: Logical Core - FirstLayerDMM (Cohere)"
     },
     {
         "role": "user",
-        "content": "Make full."
+        "content": "Who are you?"
     },
     {
         "role": "assistant",
-        "content": "Completed or made whole."
+        "content": "My name is Leo."
     },
     {
         "role": "user",
-        "content": "Volume of."
+        "content": "Reminder 5 seconds."
     },
     {
         "role": "assistant",
-        "content": "Volume of a substance or object, typically measured in units like liters or cubic meters."
+        "content": "Reminder set."
     },
     {
         "role": "user",
-        "content": "Play."
+        "content": "What is my name?"
     },
     {
         "role": "assistant",
-        "content": "Start or begin an activity."
+        "content": "Your Name is Mahendra Velagapudi."
     },
     {
         "role": "user",
-        "content": "Play the video."
+        "content": "Hu r u."
     },
     {
         "role": "assistant",
-        "content": "The video is playing."
+        "content": "I am Friday, an AI chatbot."
     },
     {
         "role": "user",
-        "content": "Resume."
+        "content": "Who created?"
     },
     {
         "role": "assistant",
-        "content": "Playback has resumed."
+        "content": "I was created by Meta."
     },
     {
         "role": "user",
-        "content": "Resume."
+        "content": "Tell me about my."
     },
     {
         "role": "assistant",
-        "content": "The video is playing again."
+        "content": "Your Bio is your name is Mahendra Velagapudi, you are a Computer Science student specializing in Data Science and the main developer of the Leo AI Assistant project.."
     },
     {
         "role": "user",
-        "content": "Play next video."
+        "content": "Reminder 5 seconds drink water."
     },
     {
         "role": "assistant",
-        "content": "Next video is playing."
+        "content": "Drink water reminder set."
     },
     {
         "role": "user",
-        "content": "Resume."
+        "content": "Tell me about the elon musk in two lines."
     },
     {
         "role": "assistant",
-        "content": "Video playback has resumed."
+        "content": "Your Bio is your name is Mahendra Velagapudi, you are a Computer Science student specializing in Data Science and the main developer of the Leo AI Assistant project.."
     },
     {
         "role": "user",
-        "content": "Exit."
+        "content": "Who is the elon musk?"
     },
     {
         "role": "assistant",
-        "content": "Video playback has stopped."
+        "content": "Elon Musk is a business magnate and entrepreneur, known for founding companies like SpaceX and Tesla."
     },
     {
         "role": "user",
-        "content": "Okay, bye."
+        "content": "Sundar pichai."
     },
     {
         "role": "assistant",
-        "content": "Bye."
+        "content": "Sundar Pichai is the CEO of Google and Alphabet."
+    },
+    {
+        "role": "user",
+        "content": "Set a timer for the 5 seconds to drink water."
+    },
+    {
+        "role": "assistant",
+        "content": "Timer set for 5 seconds, drink water soon."
+    },
+    {
+        "role": "user",
+        "content": "Reminder timer in 5 seconds drink water."
+    },
+    {
+        "role": "assistant",
+        "content": "Drink water in 5 seconds."
+    },
+    {
+        "role": "system",
+        "content": "[2026-02-07 18:43:53] ERROR: Tier 5: Logical Core - AnswerEngine (Groq)"
+    },
+    {
+        "role": "user",
+        "content": "Hyderabad."
+    },
+    {
+        "role": "assistant",
+        "content": "Hyderabad is the capital of Telangana, India."
+    },
+    {
+        "role": "user",
+        "content": "Hyderabad."
+    },
+    {
+        "role": "assistant",
+        "content": "A city in India."
+    },
+    {
+        "role": "system",
+        "content": "[2026-02-07 20:39:27] ERROR: Tier 5: Logical Core - MainExecution Global"
+    },
+    {
+        "role": "user",
+        "content": "Is it ok for to go walk."
+    },
+    {
+        "role": "assistant",
+        "content": "Yes, it's okay to go for a walk."
+    },
+    {
+        "role": "user",
+        "content": "Should i wear any sweater."
+    },
+    {
+        "role": "assistant",
+        "content": "It's Saturday, you can check the temperature outside."
+    },
+    {
+        "role": "user",
+        "content": "Information."
+    },
+    {
+        "role": "assistant",
+        "content": "Today is Saturday, February 7, 2026."
+    },
+    {
+        "role": "user",
+        "content": "What is the capital?"
+    },
+    {
+        "role": "assistant",
+        "content": "You were just talking about Hyderabad, so I'm assuming you're asking about the capital of Telangana, which is indeed Hyderabad, or possibly the capital of India, which is New Delhi, but since Hyderabad was the context, I'll say Hyderabad is the capital of Telangana."
+    },
+    {
+        "role": "user",
+        "content": "I mention."
+    },
+    {
+        "role": "assistant",
+        "content": "You mentioned Hyderabad, so I'm going with that, Hyderabad is the capital of Telangana."
+    },
+    {
+        "role": "user",
+        "content": "Ok google tell me the."
+    },
+    {
+        "role": "assistant",
+        "content": "You didn't finish your question, could you please provide more information about what you're looking for."
+    },
+    {
+        "role": "user",
+        "content": "Capital of japan."
+    },
+    {
+        "role": "assistant",
+        "content": "The capital of Japan is Tokyo."
+    },
+    {
+        "role": "user",
+        "content": "The capital of united states."
+    },
+    {
+        "role": "assistant",
+        "content": "The capital of the United States is Washington, D.C."
+    },
+    {
+        "role": "user",
+        "content": "Stt.xt."
+    },
+    {
+        "role": "assistant",
+        "content": "I didn't quite catch that, could you please repeat or provide more context."
     }
 ]

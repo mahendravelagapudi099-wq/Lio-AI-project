@@ -18,3 +18,30 @@ PyQt5
 webdriver-manager
 pyttsx3
 langdetect
+psutil
+
+# Phase 1: Voice Input Pipeline (UPGRADE)
+pvporcupine>=2.2.0          # Wake word detection (Porcupine)
+sounddevice>=0.4.6          # Audio I/O (low latency)
+faster-whisper>=0.10.0      # Local STT (Faster Whisper)
+silero-vad>=4.0.0           # Voice Activity Detection
+
+# Phase 2: Offline Capability
+ollama>=0.1.0               # Local LLM client
+piper-tts>=1.2.0           # Offline TTS fallback
+
+# Phase 1 Features
+psutil  # System monitoring (already included)
+python-magic  # File type detection
+musicbrainzngs  # Music metadata
+
+# Phase 2 Features
+imapclient  # Email integration
+pyzmail36  # Email parsing
+google-api-python-client  # Google Calendar
+google-auth-oauthlib  # OAuth2 for Google services
+
+# Phase 3 Features
+pycparser  # Custom commands parsing
+pytest-xdist  # Parallel testing
+locust  # Performance testing

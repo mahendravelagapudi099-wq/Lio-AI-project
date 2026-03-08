@@ -1,43 +1,9 @@
 import subprocess
 import os
 import time
-import pyautogui
 from pathlib import Path
 import random
 import re
-from dotenv import dotenv_values
-
-# Load API keys
-env_vars = dotenv_values(".env")
-
-# Try to import Cohere (optional, will use fallback if not available)
-try:
-    import cohere
-    COHERE_AVAILABLE = True
-    CohereAPIKey = env_vars.get("CohereAPIKey", "")
-    if CohereAPIKey:
-        co = cohere.Client(api_key=CohereAPIKey)
-    else:
-        COHERE_AVAILABLE = False
-        print("[ContentModule] No Cohere API key found in .env")
-except ImportError:
-    COHERE_AVAILABLE = False
-    print("[ContentModule] Cohere not installed")
-
-# Try to import psutil and pygetwindow (optional)
-try:
-    import psutil
-    PSUTIL_AVAILABLE = True
-except ImportError:
-    PSUTIL_AVAILABLE = False
-    print("[ContentModule] psutil not installed - some features limited")
-
-try:
-    import pygetwindow as gw
-    PYGETWINDOW_AVAILABLE = True
-except ImportError:
-    PYGETWINDOW_AVAILABLE = False
-    print("[ContentModule] pygetwindow not installed - window focus disabled")
 
 def Content(query):
     """
@@ -76,6 +42,7 @@ def Content(query):
         return False
 
 def WriteToNotepad(query):
+    import pyautogui
     """Write AI-generated or simple content to Notepad"""
     try:
         query_lower = query.lower()
@@ -84,7 +51,16 @@ def WriteToNotepad(query):
         content_to_write = ""
         
         # Check if it's a request for AI-generated content
-        if COHERE_AVAILABLE and NeedsAIGeneration(query_lower):
+        # Check availability locally for JIT
+        try:
+            from dotenv import dotenv_values
+            import cohere
+            env_vars = dotenv_values(".env")
+            has_cohere = bool(env_vars.get("CohereAPIKey"))
+        except ImportError:
+            has_cohere = False
+
+        if has_cohere and NeedsAIGeneration(query_lower):
             print("[Content] Generating content using AI...")
             content_to_write = GenerateAIContent(query)
             if not content_to_write:
@@ -160,8 +136,15 @@ def NeedsAIGeneration(query_lower):
 def GenerateAIContent(query):
     """Generate content using Cohere AI"""
     try:
-        if not COHERE_AVAILABLE:
+        from dotenv import dotenv_values
+        import cohere
+        env_vars = dotenv_values(".env")
+        CohereAPIKey = env_vars.get("CohereAPIKey", "")
+        if not CohereAPIKey:
+            print("[ContentModule] No Cohere API key found in .env")
             return None
+        
+        co = cohere.Client(api_key=CohereAPIKey)
         
         # Extract the actual content request
         content_request = ExtractContentRequest(query)
@@ -257,6 +240,7 @@ def HandleCombinedWriteAndSave(query):
         return False
 
 def SaveNotepadFile(query):
+    import pyautogui
     """Save the current Notepad file"""
     try:
         query_lower = query.lower()
@@ -334,6 +318,7 @@ def ExtractFilename(query):
     return "document.txt"
 
 def ClearNotepad():
+    import pyautogui
     """Clear all content in Notepad"""
     try:
         print("[ClearNotepad] Clearing Notepad content...")
@@ -363,7 +348,9 @@ def ClearNotepad():
 
 def IsNotepadOpen():
     """Check if Notepad is currently open"""
-    if not PSUTIL_AVAILABLE:
+    try:
+        import psutil
+    except ImportError:
         return False
     try:
         for proc in psutil.process_iter(['name']):
@@ -375,7 +362,9 @@ def IsNotepadOpen():
 
 def FocusNotepad():
     """Bring Notepad window to focus"""
-    if not PYGETWINDOW_AVAILABLE:
+    try:
+        import pygetwindow as gw
+    except ImportError:
         return False
     try:
         windows = gw.getWindowsWithTitle('Notepad')

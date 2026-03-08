@@ -1,7 +1,9 @@
 import threading
+import os
 from time import sleep
 from Backend.TextToSpeech import TextToSpeech
-from Frontend.GUI import SetAsssistantStatus, ShowTextToScreen, SetMicrophoneStatus
+from Backend.InterfaceRouter import SetAsssistantStatus, ShowTextToScreen, SetMicrophoneStatus
+from Backend.StateManager import StateManager
 from dotenv import dotenv_values
 import datetime
 import speech_recognition as sr
@@ -14,6 +16,38 @@ Username = env_vars.get("Username", "User")
 
 # Hotword configuration
 HOTWORDS = ["friday", f"hey {AssistantName.lower()}", f"ok {AssistantName.lower()}"]
+
+# ============ NEW: Audio Pipeline Configuration ============
+# Try to use new audio engine if available
+_AUDIO_ENGINE = None
+_USE_NEW_PIPELINE = env_vars.get("USE_NEW_AUDIO_PIPELINE", "false").lower() == "true"
+
+def _init_audio_engine():
+    """Initialize new audio pipeline if enabled"""
+    global _AUDIO_ENGINE
+    if _USE_NEW_PIPELINE:
+        try:
+            from Backend.AudioEngine import AudioEngine
+            
+            def on_wake():
+                print("[Hotword] Wake word detected!")
+                SetAsssistantStatus("Hotword detected...")
+            
+            def on_speech_end(audio_data):
+                print(f"[Hotword] Speech captured! Duration: {len(audio_data) / 16000:.2f}s")
+                # TODO: Send to STT
+                SetMicrophoneStatus("True")
+            
+            _AUDIO_ENGINE = AudioEngine(
+                on_wake_word=on_wake,
+                on_speech_end=on_speech_end
+            )
+            print("[Hotword] New audio pipeline initialized!")
+            return True
+        except Exception as e:
+            print(f"[Hotword] Failed to init new audio pipeline: {e}")
+            _USE_NEW_PIPELINE = False
+    return False
 
 # Time-based greeting responses with natural, contextual variations
 GREETINGS = {
@@ -110,9 +144,25 @@ is_speaking = threading.Event()
 last_activation_time = None
 hotword_triggered = False
 
-# Initialize recognizer and microphone
-recognizer = sr.Recognizer()
-microphone = sr.Microphone()
+# Initialize recognizer and microphone (Deferred/Phased)
+recognizer = None
+microphone = None
+
+def InitializeHotwordHardware():
+    """Explicit initialization for deferred/phased hardware setup."""
+    global microphone, recognizer
+    if recognizer is None:
+        recognizer = sr.Recognizer()
+        
+    if microphone is None:
+        try:
+            print("[Hotword] Initialising Microphone...")
+            microphone = sr.Microphone()
+            return True
+        except Exception as e:
+            print(f"[Hotword] Microphone Initialization Failed: {e}")
+            return False
+    return True
 
 
 def get_time_based_greeting():
@@ -242,116 +292,156 @@ def HotwordListener(main_execution_callback):
     """
     global hotword_triggered, last_activation_time
     
-    SetAsssistantStatus("Listening for hotword...")
-    print(f"Hotword listener started. Say '{HOTWORDS[0]}' to activate!")
+    mode = os.environ.get("LEO_MODE", "GUI").upper()
+    state_mgr = StateManager()
+    
+    # Check if we should use new audio pipeline
+    if _USE_NEW_PIPELINE:
+        _init_audio_engine()
+        if _AUDIO_ENGINE:
+            _AUDIO_ENGINE.start_listening()
+            print("[Hotword] Using new audio pipeline with Porcupine + VAD")
+            return  # New pipeline handles everything
+    
+    # Legacy mode: Use speech_recognition
+    if mode != "DAEMON":
+        SetAsssistantStatus("Listening for hotword...")
+        print(f"Hotword listener started. Say '{HOTWORDS[0]}' to activate!")
 
-    while True:
-        try:
-            with microphone as source:
-                recognizer.adjust_for_ambient_noise(source, duration=0.5)
-                print("Listening...")
-                audio = recognizer.listen(source, phrase_time_limit=5)
+    # Wait for microphone to be initialized (blocking but safe here)
+    while microphone is None:
+        sleep(0.5)
+        # Check readiness to avoid infinite wait if init failed
+        if state_mgr.GetState().get("readiness", {}).get("audio", False) and microphone is None:
+             # Just in case of race condition where flag is set but global var not yet updated
+             pass
 
-            try:
-                query = recognizer.recognize_google(audio).lower()
-                print(f"Heard: {query}")
+    try:
+        with microphone as source:
+            print("[Hotword] Adjusting for ambient noise... (One-time)")
+            recognizer.adjust_for_ambient_noise(source, duration=0.5)
+            
+            while True:
+                # Step 1: Wait for hardware readiness (StateManager synchronization)
+                if not state_mgr.GetState().get("readiness", {}).get("audio", False):
+                    sleep(2)
+                    continue
 
-                # Check if hotword is detected
-                if any(hotword in query for hotword in HOTWORDS):
-                    if is_speaking.is_set():
-                        print("Already processing, please wait...")
-                        continue
-
-                    is_speaking.set()
-                    last_activation_time = datetime.datetime.now()
-                    SetAsssistantStatus("Hotword detected...")
-
-                    # First time activation - Full greeting
-                    if not hotword_triggered:
-                        greeting = get_time_based_greeting()
-                        current_time = f"The current time is {get_current_time()}."
-                        date_info = f"Today is {get_current_date()}."
-
-                        # Combine all messages into one TTS call for better reliability
-                        combined_message = f"{greeting} {date_info} {current_time} How can I help you today?"
-                        
-                        ShowTextToScreen(f"{AssistantName}: {greeting}\n{date_info}\n{current_time}")
-                        TextToSpeech(combined_message)
-
-                        hotword_triggered = True
-                        SetMicrophoneStatus("True")
-                        SetAsssistantStatus("Ready for commands...")
+                if mode != "DAEMON":
+                    print("Listening...")
                     
-                    # Subsequent activations - Quick acknowledgment
-                    else:
-                        # Remove hotword from query to get actual command
-                        command = query
-                        for hotword in HOTWORDS:
-                            command = command.replace(hotword, "").strip()
-                        
-                        # If there's a command after the hotword
-                        if len(command) > 3:
-                            # Check for quick response
-                            quick_response = check_quick_response(command)
-                            if quick_response:
-                                ShowTextToScreen(f"{Username}: {command}\n{AssistantName}: {quick_response}")
-                                TextToSpeech(quick_response)
-                            else:
-                                # Process as normal command
-                                acknowledgment = random.choice(ACKNOWLEDGMENTS)
-                                ShowTextToScreen(f"{Username}: {command}")
-                                TextToSpeech(acknowledgment)
-                                
-                                SetMicrophoneStatus("True")
-                                SetAsssistantStatus("Processing command...")
-                                
-                                threading.Thread(
-                                    target=main_execution_callback,
-                                    args=(command,),
-                                    daemon=True
-                                ).start()
-                        else:
-                            # Just hotword, no command
-                            acknowledgment = random.choice(ACKNOWLEDGMENTS)
-                            TextToSpeech(acknowledgment)
+                try:
+                    audio = recognizer.listen(source, phrase_time_limit=5)
+                except sr.WaitTimeoutError:
+                    continue
+
+                try:
+                    query = recognizer.recognize_google(audio).lower()
+                    if mode != "DAEMON":
+                        print(f"Heard: {query}")
+
+                    # Check if hotword is detected
+                    if any(hotword in query for hotword in HOTWORDS):
+                        if is_speaking.is_set():
+                            print("Already processing, please wait...")
+                            continue
+
+                        is_speaking.set()
+                        last_activation_time = datetime.datetime.now()
+                        SetAsssistantStatus("Hotword detected...")
+
+                        # First time activation - Full greeting
+                        if not hotword_triggered:
+                            greeting = get_time_based_greeting()
+                            current_time = f"The current time is {get_current_time()}."
+                            date_info = f"Today is {get_current_date()}."
+
+                            # Combine all messages into one TTS call for better reliability
+                            combined_message = f"{greeting} {date_info} {current_time} How can I help you today?"
+                            
+                            ShowTextToScreen(f"{AssistantName}: {greeting}\n{date_info}\n{current_time}")
+                            TextToSpeech(combined_message)
+
+                            hotword_triggered = True
                             SetMicrophoneStatus("True")
-                            SetAsssistantStatus("Listening for commands...")
-
-                    is_speaking.clear()
-
-                # If hotword was triggered before, listen for direct commands
-                elif hotword_triggered and len(query) > 3:
-                    if is_speaking.is_set():
-                        continue
-
-                    is_speaking.set()
-                    
-                    # Check for quick response
-                    quick_response = check_quick_response(query)
-                    if quick_response:
-                        ShowTextToScreen(f"{Username}: {query}\n{AssistantName}: {quick_response}")
-                        TextToSpeech(quick_response)
-                    else:
-                        SetMicrophoneStatus("True")
-                        SetAsssistantStatus("Processing command...")
+                            SetAsssistantStatus("Ready for commands...")
                         
-                        threading.Thread(
-                            target=main_execution_callback,
-                            args=(query,),
-                            daemon=True
-                        ).start()
+                        # Subsequent activations - Quick acknowledgment
+                        else:
+                            # Remove hotword from query to get actual command
+                            command = query
+                            for hotword in HOTWORDS:
+                                command = command.replace(hotword, "").strip()
+                            
+                            # If there's a command after the hotword
+                            if len(command) > 3:
+                                # Check for quick response
+                                quick_response = check_quick_response(command)
+                                if quick_response:
+                                    ShowTextToScreen(f"{Username}: {command}\n{AssistantName}: {quick_response}")
+                                    TextToSpeech(quick_response)
+                                else:
+                                    # Process as normal command
+                                    acknowledgment = random.choice(ACKNOWLEDGMENTS)
+                                    ShowTextToScreen(f"{Username}: {command}")
+                                    TextToSpeech(acknowledgment)
+                                    
+                                    SetMicrophoneStatus("True")
+                                    SetAsssistantStatus("Processing command...")
+                                    
+                                    threading.Thread(
+                                        target=main_execution_callback,
+                                        args=(command,),
+                                        daemon=True
+                                    ).start()
+                            else:
+                                # Just hotword, no command
+                                acknowledgment = random.choice(ACKNOWLEDGMENTS)
+                                TextToSpeech(acknowledgment)
+                                SetMicrophoneStatus("True")
+                                SetAsssistantStatus("Listening for commands...")
 
-                    is_speaking.clear()
+                        is_speaking.clear()
 
-            except sr.UnknownValueError:
-                continue
-            except sr.RequestError as e:
-                print(f"Speech Recognition error: {e}")
-                sleep(1)
+                    # If hotword was triggered before, listen for direct commands
+                    elif hotword_triggered and len(query) > 3:
+                        if is_speaking.is_set() or state_mgr.GetState().get("is_busy", False):
+                            continue
 
-        except Exception as e:
-            print(f"[Hotword Listener Error]: {e}")
-            sleep(1)
+                        is_speaking.set()
+                        
+                        # Check for quick response
+                        quick_response = check_quick_response(query)
+                        if quick_response:
+                            ShowTextToScreen(f"{Username}: {query}\n{AssistantName}: {quick_response}")
+                            TextToSpeech(quick_response)
+                            is_speaking.clear()
+                        else:
+                            # Start MainExecution in a separate thread
+                            # status updates moved to MainExecution for better sync
+                            threading.Thread(
+                                target=main_execution_callback,
+                                args=(query,),
+                                daemon=True
+                            ).start()
+                            # Note: is_speaking cleared after thread start to allow 
+                            # listener to resume, but is_busy will now gate it.
+                            is_speaking.clear()
+
+                except sr.UnknownValueError:
+                    continue
+                except sr.RequestError as e:
+                    if mode != "DAEMON":
+                        print(f"Speech Recognition error: {e}")
+                    sleep(1)
+
+    except NameError as e:
+        # Specific handling for the 'sr' scoping regression or missing dependencies
+        print(f"[Hotword Hardening] Critical NameError: {e}. Check module scope imports.")
+        sleep(5)
+    except Exception as e:
+        print(f"[Hotword Listener Error]: {e}")
+        sleep(1)
 
 
 def StartHotwordThread(main_execution_callback):

@@ -1,15 +1,15 @@
-import pygame
-import random
-import asyncio
-import edge_tts
 import os
 import time
+import pygame
 import pyttsx3
 from dotenv import dotenv_values
 from langdetect import detect
 import mtranslate as mt
 from threading import Lock, current_thread
 from datetime import datetime
+import random
+import asyncio
+import edge_tts
 
 # =========================
 # GLOBAL INITIALIZATION
@@ -34,14 +34,44 @@ os.makedirs("Data", exist_ok=True)
 # Use MP3 (stable with Edge-TTS and Pygame)
 SpeechFilePath = r"Data\speech.mp3"
 
-# Initialize pygame audio ONCE
-pygame.mixer.init()
+# Deferred Hardware Initialization for Phased Startup
+offline_engine = None
+_init_lock = Lock()
+_initialized = False
 
-# Initialize offline TTS engine
-offline_engine = pyttsx3.init()
-voices = offline_engine.getProperty('voices')
-offline_engine.setProperty('voice', voices[0].id)
-offline_engine.setProperty('rate', 170)
+def InitializeTTSHardware():
+    """Explicit initialization for deferred/phased hardware setup. Thread-safe and idempotent."""
+    global offline_engine, _initialized
+    
+    # 1. Double-checked locking to avoid overhead
+    if _initialized:
+        return True
+        
+    with _init_lock:
+        # Check again inside the lock
+        if _initialized:
+            return True
+            
+        try:
+            # Initialize Pygame Mixer
+            if not pygame.mixer.get_init():
+                print("[TTS] Initialising Pygame Mixer...")
+                pygame.mixer.init()
+            
+            # Initialize Offline Engine
+            if offline_engine is None:
+                print("[TTS] Initialising Offline TTS Engine...")
+                offline_engine = pyttsx3.init()
+                voices = offline_engine.getProperty('voices')
+                if voices:
+                    offline_engine.setProperty('voice', voices[0].id)
+                offline_engine.setProperty('rate', 170)
+            
+            _initialized = True
+            return True
+        except Exception as e:
+            print(f"[TTS] Hardware Initialization Failed: {e}")
+            return False
 
 # Prevent multiple audio access
 tts_lock = Lock()
@@ -101,10 +131,14 @@ def TranslateIfNeeded(text):
 # =========================
 
 def TTS_Offline(text):
+    global offline_engine
     try:
+        InitializeTTSHardware()
+            
         Log("Speaking using OFFLINE TTS (pyttsx3)", "Fallback")
-        offline_engine.say(text)
-        offline_engine.runAndWait()
+        if offline_engine:
+            offline_engine.say(text)
+            offline_engine.runAndWait()
     except Exception as e:
         Log(f"Offline TTS failed: {e}", "Critical")
 
@@ -184,6 +218,13 @@ def TTS(text, func=lambda r=None: True):
 
     Log(f"TTS Invocated for: '{text[:50]}...'", "Queue")
 
+    # Step 6: Ensure hardware is ready (Hardened Idempotent Init)
+    # Step 6: Ensure hardware is ready (Hardened Idempotent Init)
+    InitializeTTSHardware()
+
+    success = False
+    
+    # Attempt Edge TTS with Lock
     with tts_lock:
         Log("Acquired TTS lock", "Lock")
         try:
@@ -191,12 +232,17 @@ def TTS(text, func=lambda r=None: True):
             voice = VOICE_MAP.get(lang[:2], DEFAULT_VOICE)
 
             Log(f"Generating audio in '{lang}' using voice '{voice}'")
+            
+            # Windows Threading Fix for Asyncio
+            if os.name == 'nt':
+                asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
             # Safe async loop for threads
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             try:
-                success = loop.run_until_complete(TextToAudioFile(text_to_speak, voice))
+                if loop.run_until_complete(TextToAudioFile(text_to_speak, voice)):
+                    success = True
             finally:
                 loop.close()
 
@@ -209,7 +255,7 @@ def TTS(text, func=lambda r=None: True):
                     pygame.mixer.music.play()
                 except Exception as e:
                     Log(f"Pygame load/play failed: {e}", "Error")
-                    raise  # Trigger fallback in except block
+                    raise  # Trigger fallback handling (outside lock)
 
                 Log("Playback started", "Audio")
                 clock = pygame.time.Clock()
@@ -224,17 +270,14 @@ def TTS(text, func=lambda r=None: True):
                 pygame.mixer.music.unload()
                 time.sleep(0.2) # Give OS time to release file handle
                 Log("Playback finished", "Audio")
-                return True
-
+            
             else:
-                Log("Edge TTS failed — falling back to Offline", "Warning")
-                TTS_Offline(text_to_speak)
-                return True
+                Log("Edge TTS failed — marking for fallback", "Warning")
+                success = False
 
         except Exception as e:
             Log(f"TTS System Crash: {e}", "Critical")
-            TTS_Offline(text)
-            return True
+            success = False
 
         finally:
             try:
@@ -242,6 +285,14 @@ def TTS(text, func=lambda r=None: True):
             except:
                 pass
             Log("Released TTS lock", "Lock")
+
+    # Handle Fallback OUTSIDE the lock to prevent deadlocks
+    if not success:
+        Log("Delegating to Offline TTS (Outside Lock)", "Fallback")
+        TTS_Offline(text)
+        return True
+    
+    return True
 
 
 # =========================
